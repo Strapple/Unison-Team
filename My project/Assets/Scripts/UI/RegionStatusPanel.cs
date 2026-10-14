@@ -11,6 +11,7 @@ public class RegionStatusPanel : MonoBehaviour
     public Text susuText;
     public Text suplemenText;
     public Button closeButton;
+    public CameraController cameraController;
 
     void Start()
     {
@@ -41,5 +42,7 @@ public class RegionStatusPanel : MonoBehaviour
     public void Hide()
     {
         panel.SetActive(false);
+        if (cameraController != null)
+            cameraController.ResetZoom();
     }
 }
