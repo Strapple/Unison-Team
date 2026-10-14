@@ -245,7 +245,7 @@ GameObject:
   - component: {fileID: 154470904}
   - component: {fileID: 154470903}
   - component: {fileID: 154470907}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Region_DesaA
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -359,6 +359,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RegionClickHandler
   data: {fileID: 11400000, guid: 2f8fd8cc7c67fcf498ecf8f4238b3cb8, type: 2}
   uiPanel: {fileID: 1163942576}
+  regionLayer:
+    serializedVersion: 2
+    m_Bits: 64
 --- !u!1 &329161723
 GameObject:
   m_ObjectHideFlags: 0
@@ -372,7 +375,7 @@ GameObject:
   - component: {fileID: 329161725}
   - component: {fileID: 329161724}
   - component: {fileID: 329161728}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Region_DesaB
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -486,6 +489,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RegionClickHandler
   data: {fileID: 11400000, guid: 0421c7061f8aab946b980fa060d1e7cd, type: 2}
   uiPanel: {fileID: 1163942576}
+  regionLayer:
+    serializedVersion: 2
+    m_Bits: 64
 --- !u!1 &392572823
 GameObject:
   m_ObjectHideFlags: 0
@@ -783,7 +789,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1163942575
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1317,7 +1323,7 @@ GameObject:
   - component: {fileID: 1741603065}
   - component: {fileID: 1741603064}
   - component: {fileID: 1741603068}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Region_DesaC
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1431,6 +1437,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RegionClickHandler
   data: {fileID: 11400000, guid: d18a321f559159948bea33e6db714f15, type: 2}
   uiPanel: {fileID: 1163942576}
+  regionLayer:
+    serializedVersion: 2
+    m_Bits: 64
 --- !u!1 &1923021916
 GameObject:
   m_ObjectHideFlags: 0
