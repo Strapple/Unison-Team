@@ -8,6 +8,8 @@ public class GameManager : MonoBehaviour
     public int currentMoney = 300;
     public int currentTrust = 50; // 50%
     public int currentDay = 1;
+    public int lastMissionCost = 0;
+    public int lastMissionTrustGained = 0;
 
     [Header("Active Mission")]
     public MissionData activeMission;
@@ -38,17 +40,17 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void CompleteMission()
+    public void CompleteMission(MissionData mission, int costSpent)
     {
-        if (activeMission != null)
-        {
-            // Balik modal (uang tidak berkurang, hanya di-refund)
-            // Trust bertambah
-            currentTrust += activeMission.rewardTrust;
-            Debug.Log($"Misi Selesai! Trust sekarang: {currentTrust}%");
+        lastMissionCost = costSpent;
+        lastMissionTrustGained = mission.rewardTrust;
 
-            activeMission = null;
-            // Nanti di sini kita panggil script untuk hapus Tanda Seru (!)
-        }
+        // Naikkan Trust
+        currentTrust += mission.rewardTrust;
+
+        Debug.Log($"Misi Selesai! Uang sekarang: ${currentMoney}, Trust: {currentTrust}%");
+
+        // Di sini nanti kita panggil layar Summary
+        // SummaryManager.Instance.ShowSummary(lastMissionCost, lastMissionTrustGained);
     }
 }

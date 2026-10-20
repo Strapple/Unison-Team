@@ -45,7 +45,9 @@ public class QuestMarker : MonoBehaviour
         if (cameraController != null)
             cameraController.ZoomTo(transform.position);
 
-        // 2. Nanti di sini kita panggil UI Popup Quest
-        // QuestUIManager.Instance.ShowPopup(missionToComplete);
+        if (QuestPopupManager.Instance != null && missionToComplete != null)
+        {
+            QuestPopupManager.Instance.OpenPopup(missionToComplete);
+        }
     }
 }
