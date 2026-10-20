@@ -4,7 +4,8 @@ using UnityEngine.UI;
 public class HUDManager : MonoBehaviour
 {
     public Button endDayButton;
-    public GameObject summaryPanel; // Panel Summary yang nanti kita buat
+    public GameObject summaryPanel;
+    public SummaryManager summaryManager;
 
     void Start()
     {
@@ -17,18 +18,19 @@ public class HUDManager : MonoBehaviour
 
     void OnEndDayClicked()
     {
-        // Cek apakah misi sudah selesai
         if (!GameManager.Instance.isMissionCompleted)
         {
-            Debug.Log("Misi belum selesai! Selesaikan dulu tanda serunya.");
-            // Bisa tambahkan popup warning di sini nanti
+            Debug.Log("Misi belum selesai!");
             return;
         }
 
-        // Jika selesai, munculkan Summary
-        if (summaryPanel != null)
+        // Sembunyikan tombol End Day
+        endDayButton.gameObject.SetActive(false);
+
+        // Panggil SummaryManager untuk menampilkan data
+        if (summaryManager != null)
         {
-            summaryPanel.SetActive(true);
+            summaryManager.ShowSummary();
         }
     }
 }

@@ -15,9 +15,9 @@ MonoBehaviour:
   missionTitle: Bantuan Pemanasan
   description: Alliwardey dan teman-teman butuh obat dan beras, segera kirimkan pls
   missionImage: {fileID: 0}
-  reqObat: 1
+  reqObat: 3
   reqBeras: 1
-  hargaObat: 25
+  hargaObat: 20
   hargaBeras: 10
-  rewardTrust: 20
-  profitUang: 0
+  rewardTrust: 40
+  profitUang: 50

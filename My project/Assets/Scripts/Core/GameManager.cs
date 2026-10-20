@@ -11,6 +11,7 @@ public class GameManager : MonoBehaviour
 
     [Header("Summary Data")]
     public int lastMissionCost = 0;
+    public int lastMissionProfit = 0;
     public int lastMissionTrustGained = 0;
     public string lastMissionTitle = "";
 
@@ -48,15 +49,18 @@ public class GameManager : MonoBehaviour
     public void CompleteMission(MissionData mission, int costSpent)
     {
         lastMissionCost = costSpent;
+        lastMissionProfit = mission.profitUang; // <-- Ambil profit dari ScriptableObject
         lastMissionTrustGained = mission.rewardTrust;
         lastMissionTitle = mission.missionTitle;
 
-        // Tandai bahwa misi hari ini sudah selesai
         isMissionCompleted = true;
 
         // Naikkan Trust
         currentTrust += mission.rewardTrust;
 
-        Debug.Log($"Misi Selesai! Uang sekarang: ${currentMoney}, Trust: {currentTrust}%");
+        // UANG: Kembalikan modal (costSpent) + Berikan Profit (profitUang)
+        currentMoney += (costSpent + mission.profitUang);
+
+        Debug.Log($"Misi Selesai! Profit didapat: ${mission.profitUang}. Total Uang sekarang: ${currentMoney}, Trust: {currentTrust}%");
     }
 }
