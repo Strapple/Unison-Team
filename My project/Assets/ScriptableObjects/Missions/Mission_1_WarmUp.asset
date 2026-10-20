@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a78ffc33c780074a80fe63732ebbc4b, type: 3}
   m_Name: Mission_1_WarmUp
   m_EditorClassIdentifier: Assembly-CSharp::MissionData
-  missionTitle: Bantuan Darurat
-  description: Desa membutuhkan bantuan segera.
+  missionTitle: Bantuan Pemanasan
+  description: Alliwardey dan teman-teman butuh obat dan beras, segera kirimkan pls
   missionImage: {fileID: 0}
-  reqObat: 3
+  reqObat: 1
   reqBeras: 1
   hargaObat: 25
   hargaBeras: 10

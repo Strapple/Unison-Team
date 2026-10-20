@@ -23,7 +23,19 @@ public class GameManager : MonoBehaviour
     {
         activeMission = mission;
         Debug.Log("Misi dimulai: " + mission.missionTitle);
-        // Nanti di sini kita panggil script untuk spawn Tanda Seru (!)
+
+        // Cari semua QuestMarker di dalam scene (termasuk yang sedang mati)
+        QuestMarker[] allMarkers = Resources.FindObjectsOfTypeAll<QuestMarker>();
+
+        foreach (QuestMarker marker in allMarkers)
+        {
+            // Jika misi yang dipilih sama dengan misi di marker, nyalakan markernya
+            if (marker.missionToComplete == mission)
+            {
+                marker.gameObject.SetActive(true);
+                Debug.Log("Tanda seru dimunculkan!");
+            }
+        }
     }
 
     public void CompleteMission()
