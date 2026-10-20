@@ -7,6 +7,7 @@ public class MissionMenuManager : MonoBehaviour
     public GameObject missionListPanel;
     public GameObject missionDetailPanel;
     public GameObject environment3D;
+    public GameObject endDayButton;
 
     [Header("Detail UI Elements (Standard Text)")]
     public Image detailImage;
@@ -54,10 +55,11 @@ public class MissionMenuManager : MonoBehaviour
         missionListPanel.SetActive(false);
         missionDetailPanel.SetActive(false);
 
-        // Nyalakan 3D Map
         if (environment3D != null) environment3D.SetActive(true);
 
-        // Beritahu GameManager misi apa yang sedang aktif
+        // Munculkan tombol End Day
+        if (endDayButton != null) endDayButton.SetActive(true);
+
         if (GameManager.Instance != null)
         {
             GameManager.Instance.StartMission(selectedMission);

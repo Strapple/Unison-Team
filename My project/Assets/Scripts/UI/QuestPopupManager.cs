@@ -74,14 +74,19 @@ public class QuestPopupManager : MonoBehaviour
 
     public void OnKirimClicked()
     {
+        // Potong uang
         GameManager.Instance.currentMoney -= totalCost;
+
+        // Tutup Popup
         popupPanel.SetActive(false);
 
-        // Reset Kamera saat Kirim
+        // Reset Kamera
         if (cameraController != null) cameraController.ResetZoom();
 
+        // Beritahu GameManager bahwa misi selesai
         GameManager.Instance.CompleteMission(currentMission, totalCost);
 
+        // Sembunyikan Tanda Seru
         QuestMarker[] allMarkers = Resources.FindObjectsOfTypeAll<QuestMarker>();
         foreach (var m in allMarkers)
         {

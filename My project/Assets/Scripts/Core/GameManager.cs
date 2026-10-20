@@ -8,11 +8,15 @@ public class GameManager : MonoBehaviour
     public int currentMoney = 300;
     public int currentTrust = 50; // 50%
     public int currentDay = 1;
+
+    [Header("Summary Data")]
     public int lastMissionCost = 0;
     public int lastMissionTrustGained = 0;
+    public string lastMissionTitle = "";
 
     [Header("Active Mission")]
     public MissionData activeMission;
+    public bool isMissionCompleted = false; // <-- INI YANG BARU DITAMBAHKAN
 
     void Awake()
     {
@@ -24,6 +28,7 @@ public class GameManager : MonoBehaviour
     public void StartMission(MissionData mission)
     {
         activeMission = mission;
+        isMissionCompleted = false; // Reset status saat misi baru dimulai
         Debug.Log("Misi dimulai: " + mission.missionTitle);
 
         // Cari semua QuestMarker di dalam scene (termasuk yang sedang mati)
@@ -44,13 +49,14 @@ public class GameManager : MonoBehaviour
     {
         lastMissionCost = costSpent;
         lastMissionTrustGained = mission.rewardTrust;
+        lastMissionTitle = mission.missionTitle;
+
+        // Tandai bahwa misi hari ini sudah selesai
+        isMissionCompleted = true;
 
         // Naikkan Trust
         currentTrust += mission.rewardTrust;
 
         Debug.Log($"Misi Selesai! Uang sekarang: ${currentMoney}, Trust: {currentTrust}%");
-
-        // Di sini nanti kita panggil layar Summary
-        // SummaryManager.Instance.ShowSummary(lastMissionCost, lastMissionTrustGained);
     }
 }
