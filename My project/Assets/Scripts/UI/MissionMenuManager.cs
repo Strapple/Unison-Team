@@ -23,10 +23,17 @@ public class MissionMenuManager : MonoBehaviour
 
     void Start()
     {
-        // Pastikan saat mulai, Menu nyala, Gameplay mati
+        // 1. Paksa nyalakan Canvas & List
         if (canvasMenu != null) canvasMenu.SetActive(true);
+        if (missionListPanel != null) missionListPanel.SetActive(true);
+
+        // 2. Paksa matikan Detail, Gameplay, dan Peta
+        if (missionDetailPanel != null) missionDetailPanel.SetActive(false);
         if (canvasGameplay != null) canvasGameplay.SetActive(false);
         if (environment3D != null) environment3D.SetActive(false);
+
+        // Opsional: Cek apakah berhasil (muncul di Console)
+        Debug.Log("Start Menu dijalankan. List Panel status: " + missionListPanel.activeSelf);
     }
 
     public void OpenDetail(MissionData mission)
@@ -51,20 +58,19 @@ public class MissionMenuManager : MonoBehaviour
 
     public void StartMission()
     {
-        // 1. Matikan Menu
         canvasMenu.SetActive(false);
 
-        // 2. Nyalakan Peta & Gameplay UI
+        // 1. Simpan misi DULU ke GameManager
+        if (GameManager.Instance != null)
+            GameManager.Instance.StartMission(selectedMission);
+
+        // 2. Nyalakan Peta & UI
         if (environment3D != null) environment3D.SetActive(true);
         if (canvasGameplay != null) canvasGameplay.SetActive(true);
-
-        // 3. Mulai Misi di GameManager
-        if (GameManager.Instance != null)
-        {
-            GameManager.Instance.StartMission(selectedMission);
-        }
-
-        // 4. Munculkan tombol End Day (jika diurus di sini)
         if (endDayButton != null) endDayButton.SetActive(true);
+
+        // 3. TAMBAHKAN INI: Paksa HUD nyalakan titik merah
+        HUDManager hud = FindObjectOfType<HUDManager>();
+        if (hud != null) hud.UpdateReportNotif();
     }
 }

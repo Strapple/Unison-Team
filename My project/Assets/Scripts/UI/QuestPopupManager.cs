@@ -43,8 +43,17 @@ public class QuestPopupManager : MonoBehaviour
 
     public void OpenPopup()
     {
-        if (GameManager.Instance.activeMission == null) return;
+        // 1. CEK KONDISI: Jika tidak ada misi aktif ATAU misi sudah selesai
+        if (GameManager.Instance.activeMission == null || GameManager.Instance.isMissionCompleted)
+        {
+            if (logText != null)
+                logText.text = "Kurir: 'Tidak ada report yang tersedia saat ini. Silakan End Day.'";
 
+            Debug.Log("Tidak ada report yang tersedia.");
+            return; // Hentikan fungsi di sini, jangan buka popup
+        }
+
+        // 2. JIKA ADA MISI AKTIF, LANJUTKAN SEPERTI BIASA
         currentMission = GameManager.Instance.activeMission;
 
         // Reset pilihan
@@ -133,34 +142,62 @@ public class QuestPopupManager : MonoBehaviour
     {
         if (totalCost > GameManager.Instance.currentMoney) return;
 
+        // 1. Potong Uang & Tutup Popup
         GameManager.Instance.currentMoney -= totalCost;
         popupPanel.SetActive(false);
         if (cameraController != null) cameraController.ResetZoom();
 
-        // Validasi (Puzzle)
+        // 2. Validasi (Puzzle)
         bool isCorrect = false;
         if (currentMission.correctItemName == "Beras")
             isCorrect = (countBeras == currentMission.correctAmount && countObat == 0);
         else if (currentMission.correctItemName == "Obat")
             isCorrect = (countObat == currentMission.correctAmount && countBeras == 0);
 
+        QuestMarker[] allMarkers = Resources.FindObjectsOfTypeAll<QuestMarker>();
+
+        // 3. Eksekusi Hasil
         if (isCorrect)
         {
-            GameManager.Instance.CompleteMission(currentMission, totalCost);
+            // --- JIKA BENAR ---
+            GameManager.Instance.CompleteMission(currentMission, totalCost); // Ini otomatis set isMissionCompleted = true & isi data Summary
             if (logText != null) logText.text = "Warga: 'Terima kasih banyak! Bantuanmu sangat tepat.'";
+
+            // Mainkan animasi ceklis
+            foreach (var m in allMarkers)
+            {
+                if (m.missionToComplete == currentMission) m.PlaySuccessAnimation();
+            }
         }
         else
         {
+            // --- JIKA SALAH ---
             GameManager.Instance.currentTrust -= 10;
             if (logText != null) logText.text = "Warga: 'Ini bukan yang kami butuhkan...' (Trust -10%)";
+
+            // Set data manual untuk Summary karena gagal
+            GameManager.Instance.isMissionCompleted = true;
+            GameManager.Instance.lastMissionCost = totalCost;
+            GameManager.Instance.lastMissionProfit = 0;
+            GameManager.Instance.lastMissionTrustGained = -10;
+            GameManager.Instance.lastMissionTitle = currentMission.missionTitle;
+
+            // Matikan tanda seru LANGSUNG TANPA CEKLIS
+            foreach (var m in allMarkers)
+            {
+                if (m.missionToComplete == currentMission) m.gameObject.SetActive(false);
+            }
         }
 
-        QuestMarker[] allMarkers = Resources.FindObjectsOfTypeAll<QuestMarker>();
-        foreach (var m in allMarkers)
+        // 4. Hilangkan titik merah di Report Card
+        HUDManager hud = FindObjectOfType<HUDManager>();
+        if (hud != null)
         {
-            if (m.missionToComplete == currentMission) m.PlaySuccessAnimation();
+            hud.UpdateReportNotif();
+            hud.UpdateHUD(); 
         }
 
+        // 5. Cooldown Truk (Hanya dipanggil sekali)
         if (truckManager != null)
         {
             truckManager.UseTruck();
