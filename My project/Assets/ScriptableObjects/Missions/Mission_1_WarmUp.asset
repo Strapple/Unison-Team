@@ -12,12 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a78ffc33c780074a80fe63732ebbc4b, type: 3}
   m_Name: Mission_1_WarmUp
   m_EditorClassIdentifier: Assembly-CSharp::MissionData
-  missionTitle: Bantuan Pemanasan
-  description: Alliwardey dan teman-teman butuh obat dan beras, segera kirimkan pls
-  missionImage: {fileID: 0}
-  reqObat: 3
-  reqBeras: 1
-  hargaObat: 20
+  missionTitle: Bantuan Darurat Wabah
+  description: Desa terancam wabah penyakit. Tolong kirimkan bantuan medis segera.
+  missionImage: {fileID: 21300000, guid: ce00533a80434a240be3249022f9a094, type: 3}
+  missionType: Danger
+  locationDesc: Tanda Danger di Peta
   hargaBeras: 10
-  rewardTrust: 40
+  hargaObat: 25
+  rewardTrust: 20
   profitUang: 50
+  correctItemName: Obat
+  correctAmount: 3

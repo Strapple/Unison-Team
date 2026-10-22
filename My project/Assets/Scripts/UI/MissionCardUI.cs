@@ -3,28 +3,33 @@ using UnityEngine.UI;
 
 public class MissionCardUI : MonoBehaviour
 {
-    public MissionData missionData; // Tempat naruh file ScriptableObject
-    public Text titleText;          // Tempat naruh teks judul
-    public Button cardButton;       // Tombolnya sendiri
+    public MissionData missionData;
+
+    [Header("UI Elements")]
+    public Image cardImage;   // Untuk Gambar
+    public Text titleText;    // Untuk Judul
+    public Button cardButton; // Tombolnya sendiri
 
     private MissionMenuManager menuManager;
 
     void Start()
     {
-        // Cari MenuManager di scene
         menuManager = FindObjectOfType<MissionMenuManager>();
 
         if (missionData != null)
         {
-            // INI KUNCI UTAMANYA: Ubah teks "Title" menjadi judul dari SO
-            titleText.text = missionData.missionTitle;
+            // 1. Set Gambar dari MissionData
+            if (cardImage != null && missionData.missionImage != null)
+            {
+                cardImage.sprite = missionData.missionImage;
+            }
 
-            // Tambahkan fungsi klik
+            // 2. Set Judul
+            if (titleText != null)
+                titleText.text = missionData.missionTitle;
+
+            // 3. Setup tombol klik
             cardButton.onClick.AddListener(OnCardClicked);
-        }
-        else
-        {
-            Debug.LogError("MissionData belum dimasukkan ke Card!");
         }
     }
 
