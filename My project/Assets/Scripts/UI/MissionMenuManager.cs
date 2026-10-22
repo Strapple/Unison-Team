@@ -1,47 +1,46 @@
 using UnityEngine;
-using UnityEngine.UI; // Wajib ada untuk Image, Button, dan Text biasa
+using UnityEngine.UI;
 
 public class MissionMenuManager : MonoBehaviour
 {
-    [Header("Panel")]
+    [Header("UI Menu References")]
     public GameObject missionListPanel;
     public GameObject missionDetailPanel;
-    public GameObject environment3D;
-    public GameObject endDayButton;
+    public GameObject canvasMenu; // Canvas_Menu itu sendiri
 
-    [Header("Detail UI Elements (Standard Text)")]
+    [Header("Gameplay References")]
+    public GameObject environment3D; // Peta 3D
+    public GameObject canvasGameplay; // HUD (Uang, Truk, dll)
+    public GameObject endDayButton; // Tombol End Day (jika belum diurus HUDManager)
+
+    [Header("Detail UI Elements")]
     public Image detailImage;
-    public Text detailTitle;        // <-- Diubah ke Text biasa
-    public Text detailDescription;  // <-- Diubah ke Text biasa
-    public Text detailRewardText;   // <-- Diubah ke Text biasa
-    public Button startButton;
+    public Text detailTitle;
+    public Text detailDescription;
+    public Text detailRewardText;
 
     private MissionData selectedMission;
 
     void Start()
     {
-        // Awal game: Tampilkan List, matikan Detail & 3D Map
-        missionListPanel.SetActive(true);
-        missionDetailPanel.SetActive(false);
-        environment3D.SetActive(false);
+        // Pastikan saat mulai, Menu nyala, Gameplay mati
+        if (canvasMenu != null) canvasMenu.SetActive(true);
+        if (canvasGameplay != null) canvasGameplay.SetActive(false);
+        if (environment3D != null) environment3D.SetActive(false);
     }
 
-    // Dipanggil saat Card Misi diklik
     public void OpenDetail(MissionData mission)
     {
         selectedMission = mission;
         missionListPanel.SetActive(false);
         missionDetailPanel.SetActive(true);
 
-        // Isi Data UI
-        if (mission.missionImage != null)
-            detailImage.sprite = mission.missionImage;
-
+        if (mission.missionImage != null) detailImage.sprite = mission.missionImage;
         detailTitle.text = mission.missionTitle;
         detailDescription.text = mission.description;
 
-        int totalCost = (mission.reqObat * mission.hargaObat) + (mission.reqBeras * mission.hargaBeras);
-        detailRewardText.text = $"Reward: +{mission.rewardTrust}% Trust\n(Uang kembali: ${totalCost})";
+        // Sesuaikan dengan sistem puzzle baru
+        detailRewardText.text = $"Reward: +{mission.rewardTrust}% Trust\n(Estimasi Profit: ${mission.profitUang})";
     }
 
     public void BackToList()
@@ -52,17 +51,20 @@ public class MissionMenuManager : MonoBehaviour
 
     public void StartMission()
     {
-        missionListPanel.SetActive(false);
-        missionDetailPanel.SetActive(false);
+        // 1. Matikan Menu
+        canvasMenu.SetActive(false);
 
+        // 2. Nyalakan Peta & Gameplay UI
         if (environment3D != null) environment3D.SetActive(true);
+        if (canvasGameplay != null) canvasGameplay.SetActive(true);
 
-        // Munculkan tombol End Day
-        if (endDayButton != null) endDayButton.SetActive(true);
-
+        // 3. Mulai Misi di GameManager
         if (GameManager.Instance != null)
         {
             GameManager.Instance.StartMission(selectedMission);
         }
+
+        // 4. Munculkan tombol End Day (jika diurus di sini)
+        if (endDayButton != null) endDayButton.SetActive(true);
     }
 }

@@ -8,19 +8,7 @@ public class QuestPopupManager : MonoBehaviour
     [Header("UI References")]
     public GameObject popupPanel;
     public Text titleText;
-    public Text moneyText;
-    public Text obatCountText;
-    public Text berasCountText;
-    public Text costText;
-    public Button kirimButton;
-
-    [Header("Camera Reference")]
-    public CameraController cameraController; // <-- TAMBAHKAN INI
-
-    private MissionData currentMission;
-    private int inputObat = 0;
-    private int inputBeras = 0;
-    private int totalCost = 0;
+    public CameraController cameraController;
 
     void Awake()
     {
@@ -33,72 +21,47 @@ public class QuestPopupManager : MonoBehaviour
         popupPanel.SetActive(false);
     }
 
-    public void OpenPopup(MissionData mission)
+    // Fungsi ini dipanggil oleh Tombol Truk
+    public void OpenPopup()
     {
-        currentMission = mission;
-        inputObat = 0;
-        inputBeras = 0;
+        if (GameManager.Instance.activeMission == null)
+        {
+            Debug.Log("Belum ada misi aktif!");
+            return;
+        }
 
-        titleText.text = mission.missionTitle;
-        popupPanel.SetActive(true);
-
-        UpdateUI();
-    }
-
-    public void AddObat(int amount)
-    {
-        inputObat = Mathf.Clamp(inputObat + amount, 0, currentMission.reqObat);
-        UpdateUI();
-    }
-
-    public void AddBeras(int amount)
-    {
-        inputBeras = Mathf.Clamp(inputBeras + amount, 0, currentMission.reqBeras);
-        UpdateUI();
-    }
-
-    void UpdateUI()
-    {
-        moneyText.text = $"Uang: ${GameManager.Instance.currentMoney}";
-        obatCountText.text = $"{inputObat} / {currentMission.reqObat}";
-        berasCountText.text = $"{inputBeras} / {currentMission.reqBeras}";
-
-        totalCost = (inputObat * currentMission.hargaObat) + (inputBeras * currentMission.hargaBeras);
-        costText.text = $"Cost: ${totalCost}";
-
-        bool isMoneyEnough = GameManager.Instance.currentMoney >= totalCost;
-        bool isRequirementMet = (inputObat >= currentMission.reqObat) && (inputBeras >= currentMission.reqBeras);
-
-        kirimButton.interactable = isMoneyEnough && isRequirementMet;
-    }
-
-    public void OnKirimClicked()
-    {
-        // Potong uang
-        GameManager.Instance.currentMoney -= totalCost;
-
-        // Tutup Popup
-        popupPanel.SetActive(false);
-
-        // Reset Kamera
-        if (cameraController != null) cameraController.ResetZoom();
-
-        // Beritahu GameManager bahwa misi selesai
-        GameManager.Instance.CompleteMission(currentMission, totalCost);
-
-        // Sembunyikan Tanda Seru
+        // 1. CARI TANDA SERU YANG AKTIF
+        QuestMarker targetMarker = null;
         QuestMarker[] allMarkers = Resources.FindObjectsOfTypeAll<QuestMarker>();
+
         foreach (var m in allMarkers)
         {
-            if (m.missionToComplete == currentMission) m.gameObject.SetActive(false);
+            // Jika marker ini cocok dengan misi aktif dan sedang menyala di scene
+            if (m.missionToComplete == GameManager.Instance.activeMission && m.gameObject.activeInHierarchy)
+            {
+                targetMarker = m;
+                break;
+            }
         }
+
+        // 2. ZOOM KAMERA KE TANDA SERU
+        if (targetMarker != null && cameraController != null)
+        {
+            cameraController.ZoomTo(targetMarker.transform.position);
+        }
+
+        // 3. TAMPILKAN UI
+        titleText.text = $"REPORT 1\n{GameManager.Instance.activeMission.missionTitle}\nApa yang ingin dikirim?";
+        popupPanel.SetActive(true);
     }
 
+    // Fungsi saat tombol Batal diklik
     public void OnBatalkanClicked()
     {
         popupPanel.SetActive(false);
 
-        // Reset Kamera saat Batal
-        if (cameraController != null) cameraController.ResetZoom();
+        // Zoom out kembali ke pandangan awal
+        if (cameraController != null)
+            cameraController.ResetZoom();
     }
 }

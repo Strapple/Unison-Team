@@ -1,53 +1,35 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
+using System.Collections;
 
 public class QuestMarker : MonoBehaviour
 {
-    public CameraController cameraController;
-    public LayerMask questMarkerLayer; // Set ke layer "QuestMarker" di Inspector
-    public MissionData missionToComplete; // Misi yang dikaitkan dengan marker ini
+    [Header("Data")]
+    public MissionData missionToComplete;
 
-    private Camera cam;
+    [Header("Visual Marker")]
+    public GameObject visualExclamation; 
+    public GameObject visualCheckmark;   
 
     void Start()
     {
-        cam = Camera.main;
+        
+        if (visualCheckmark != null) visualCheckmark.SetActive(false);
     }
 
-    void Update()
+    // Fungsi yang dipanggil saat misi berhasil diselesaikan
+    public void PlaySuccessAnimation()
     {
-        if (Mouse.current == null || cam == null) return;
-
-        // Jangan respon klik kalau kamera sedang zoom
-        if (cameraController != null && cameraController.IsZoomed()) return;
-
-        if (Mouse.current.leftButton.wasPressedThisFrame)
-        {
-            Ray ray = cam.ScreenPointToRay(Mouse.current.position.ReadValue());
-
-            // Raycast HANYA ke Layer QuestMarker
-            if (Physics.Raycast(ray, out RaycastHit hit, 500f, questMarkerLayer))
-            {
-                // Jika yang kena adalah objek ini
-                if (hit.collider.gameObject == gameObject)
-                {
-                    OnMarkerClicked();
-                }
-            }
-        }
+        StartCoroutine(SuccessSequence());
     }
 
-    void OnMarkerClicked()
+    IEnumerator SuccessSequence()
     {
-        Debug.Log("Tanda seru diklik!");
+        
+        if (visualExclamation != null) visualExclamation.SetActive(false);
+        if (visualCheckmark != null) visualCheckmark.SetActive(true);
 
-        // 1. Zoom Kamera ke posisi Tanda Seru
-        if (cameraController != null)
-            cameraController.ZoomTo(transform.position);
+        yield return new WaitForSeconds(2f);
 
-        if (QuestPopupManager.Instance != null && missionToComplete != null)
-        {
-            QuestPopupManager.Instance.OpenPopup(missionToComplete);
-        }
+        gameObject.SetActive(false);
     }
 }
