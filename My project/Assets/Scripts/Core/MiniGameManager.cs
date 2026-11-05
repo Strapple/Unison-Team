@@ -16,6 +16,9 @@ public class MiniGameManager : MonoBehaviour
     public Text txtCounter;
     public Button btnFinish;
 
+    [Header("References")]
+    public TruckWaypoint truckWaypoint;
+
     private int countBeras = 0;
     private int countObat = 0;
 
@@ -127,7 +130,14 @@ public class MiniGameManager : MonoBehaviour
             hud.UpdateHUD();
         }
 
-        // 7. Nanti di sini kita panggil animasi Truk berjalan
-        // TruckWaypoint.Instance.StartDelivery();
+        // 7. Jalankan Animasi Truk
+        if (truckWaypoint != null)
+        {
+            truckWaypoint.StartDelivery();
+        }
+        else
+        {
+            Debug.LogError("Truk belum dimasukkan ke Inspector MiniGameManager!");
+        }
     }
 }
