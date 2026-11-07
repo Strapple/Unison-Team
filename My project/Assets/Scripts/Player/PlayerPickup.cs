@@ -2,42 +2,46 @@ using UnityEngine;
 
 public class PlayerPickup : MonoBehaviour
 {
-    [Header("Barang yang Dibawa")]
-    public GameObject carriedItem;
-    public Transform carryPosition;
+    public bool isCarrying = false;
+    private string carriedItemType = "";
 
-    [Header("Prefabs Barang")]
-    public GameObject prefabBeras;
-    public GameObject prefabObat;
+    private Animator anim;
+
+    void Start()
+    {
+        anim = GetComponentInChildren<Animator>();
+    }
 
     private void OnTriggerEnter(Collider other)
     {
-        // 1. AMBIL BARANG DARI KRAT BERAS
-        if (other.gameObject.name == "Krat_Beras" && carriedItem == null)
+        if (other.gameObject.name == "Krat_Beras" && !isCarrying)
         {
-            GameObject newItem = Instantiate(prefabBeras, carryPosition.position, Quaternion.identity);
-            newItem.transform.SetParent(carryPosition);
-            carriedItem = newItem;
+            isCarrying = true;
+            carriedItemType = "Beras";
+
+            if (anim != null) anim.SetBool("isBawaBarang", true);
+            Debug.Log("Mengambil Beras");
         }
-        // 2. AMBIL BARANG DARI KRAT OBAT
-        else if (other.gameObject.name == "Krat_Obat" && carriedItem == null)
+        else if (other.gameObject.name == "Krat_Obat" && !isCarrying)
         {
-            GameObject newItem = Instantiate(prefabObat, carryPosition.position, Quaternion.identity);
-            newItem.transform.SetParent(carryPosition);
-            carriedItem = newItem;
+            isCarrying = true;
+            carriedItemType = "Obat";
+
+            if (anim != null) anim.SetBool("isBawaBarang", true);
+            Debug.Log("Mengambil Obat");
         }
 
-        // 3. TARUH BARANG DI TRUK
-        if (other.gameObject.name == "Truk_Area" && carriedItem != null)
+        if (other.gameObject.name == "Truk_Area" && isCarrying)
         {
-            // Cek barang apa yang sedang dibawa berdasarkan nama Prefab-nya
-            string itemName = carriedItem.name.Replace("(Clone)", ""); // Hapus teks (Clone) bawaan Unity
+            isCarrying = false;
 
-            Destroy(carriedItem);
-            carriedItem = null;
+            if (anim != null)
+            {
+                anim.SetBool("isBawaBarang", false);
+            }
 
-            // Kirim info ke MiniGameManager
-            MiniGameManager.Instance.AddItemToTruck(itemName);
+            MiniGameManager.Instance.AddItemToTruck(carriedItemType);
+            carriedItemType = "";
         }
     }
 }

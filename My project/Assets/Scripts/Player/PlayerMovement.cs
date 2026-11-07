@@ -1,35 +1,35 @@
 using UnityEngine;
-using UnityEngine.InputSystem; // Wajib untuk Input System baru
+using UnityEngine.InputSystem;
 
 public class PlayerMovement : MonoBehaviour
 {
     [Header("Movement Settings")]
-    public float moveSpeed = 8f;
-    public float rotationSpeed = 10f;
+    public float walkSpeed;
+    public float runSpeed;
+    public float rotationSpeed;
 
     [Header("Gravity")]
-    public float gravity = -9.81f;
+    public float gravity;
 
     private CharacterController controller;
+    private Animator anim;
     private float verticalVelocity = 0f;
 
     void Start()
     {
-        // Mengambil komponen Character Controller yang ada di objek ini
         controller = GetComponent<CharacterController>();
+        anim = GetComponentInChildren<Animator>();
 
         if (controller == null)
-        {
-            Debug.LogError("Karakter butuh komponen Character Controller! Tambahkan dulu di Inspector.");
-        }
+            Debug.LogError("Karakter butuh komponen Character Controller!");
+        if (anim == null)
+            Debug.LogWarning("Animator tidak ditemukan di karakter ini atau child-nya!");
     }
 
     void Update()
     {
-        // Cek apakah keyboard terdeteksi
         if (Keyboard.current == null) return;
 
-        // 1. Baca Input (WASD atau Panah)
         float horizontal = 0f;
         float vertical = 0f;
 
@@ -38,25 +38,34 @@ public class PlayerMovement : MonoBehaviour
         if (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed) horizontal += 1f;
         if (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed) horizontal -= 1f;
 
-        // 2. Hitung arah pergerakan
         Vector3 moveDirection = new Vector3(horizontal, 0f, vertical).normalized;
 
-        // 3. Logika Gravity (Agar tidak melayang)
+        bool isRunning = Keyboard.current.shiftKey.isPressed;
+        float currentSpeed = isRunning ? runSpeed : walkSpeed;
+
         if (controller.isGrounded && verticalVelocity < 0)
         {
-            verticalVelocity = -2f; // Tempel ke lantai
+            verticalVelocity = -2f;
         }
         verticalVelocity += gravity * Time.deltaTime;
 
-        // 4. Eksekusi Pergerakan
-        Vector3 finalMove = new Vector3(moveDirection.x * moveSpeed, verticalVelocity, moveDirection.z * moveSpeed);
+        Vector3 finalMove = new Vector3(moveDirection.x * currentSpeed, verticalVelocity, moveDirection.z * currentSpeed);
         controller.Move(finalMove * Time.deltaTime);
 
-        // 5. Rotasi Karakter (Menghadap ke arah jalan)
         if (moveDirection != Vector3.zero)
         {
             Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+        }
+
+        if (anim != null)
+        {
+            float animSpeed = 0f;
+            if (moveDirection != Vector3.zero)
+            {
+                animSpeed = isRunning ? 2f : 1f;
+            }
+            anim.SetFloat("Speed", animSpeed);
         }
     }
 }

@@ -3,7 +3,102 @@ guid: 495a598310885e1418eada658c0647bd
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Abu
+    second: {fileID: 2100000, guid: d30381b4079ccdd428996d58f2ebf6f7, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AirSumur
+    second: {fileID: 2100000, guid: 303296a84ca65804f9eeae7bcb8887e5, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Atap
+    second: {fileID: 2100000, guid: 4488f3236c5a9ae469ef8f3bacf11080, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Atap.001
+    second: {fileID: 2100000, guid: d9579ca20aa6416408c68e2169dcd581, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Atap.002
+    second: {fileID: 2100000, guid: 51c50bb7562419b42b4cee530ad24fc3, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Atap.003
+    second: {fileID: 2100000, guid: 7373cdc0f5716164cb0d5d9f2805737e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Atap.004
+    second: {fileID: 2100000, guid: 832a507766fc39449b949ab8bcb3b854, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Atap.005
+    second: {fileID: 2100000, guid: af9edc67fb8978243850a92cafb97c55, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Atap.006
+    second: {fileID: 2100000, guid: 984ae6884b57a054e9e42eb64c33db14, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Atap.007
+    second: {fileID: 2100000, guid: f35d92fcdb24f074abdc111cfc5a29d7, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Atap.008
+    second: {fileID: 2100000, guid: bc2261fc5dd97d84288449ee2dc39042, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Atap.009
+    second: {fileID: 2100000, guid: 9d40c3a4eb0b05b4baf545c03f8509f2, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Atap.010
+    second: {fileID: 2100000, guid: bd3855a1962c09b40a89f5d0f3f75a4b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AtapSumur
+    second: {fileID: 2100000, guid: faf4c3e0c1eea384faa1d6d26f3a97a5, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Kaca
+    second: {fileID: 2100000, guid: 560b3d88477cf9b4ab1b45a629595845, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Pilar
+    second: {fileID: 2100000, guid: a908a493cae25624cb6dfc342fd90e83, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Pintu & Jendela
+    second: {fileID: 2100000, guid: 1736b5925bcb8264e85410d6c85eb825, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Rumah
+    second: {fileID: 2100000, guid: 76ea73555e142b142bf22ba8d436403b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Sumur
+    second: {fileID: 2100000, guid: 54f8503d4626af4499ce03030ff7d165, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

@@ -6,10 +6,10 @@ public class MiniGameManager : MonoBehaviour
     public static MiniGameManager Instance;
 
     [Header("UI & Camera References")]
-    public GameObject canvasMiniGame; // Canvas Mini Game
-    public GameObject canvasGameplay; // HUD Peta (Uang, dll)
-    public GameObject mainCamera;     // Kamera Peta
-    public GameObject miniGameCamera; // Kamera Mini Game
+    public GameObject canvasMiniGame;
+    public GameObject canvasGameplay;
+    public GameObject mainCamera;
+    public GameObject miniGameCamera;
 
     [Header("Mini Game UI")]
     public GameObject miniGameUI;
@@ -33,7 +33,6 @@ public class MiniGameManager : MonoBehaviour
         if (miniGameUI != null) miniGameUI.SetActive(false);
     }
 
-    // Fungsi untuk MEMULAI mini-game (Dipanggil dari tombol Kirim di Popup)
     public void StartMiniGame()
     {
         countBeras = 0;
@@ -46,10 +45,8 @@ public class MiniGameManager : MonoBehaviour
         if (canvasMiniGame != null) canvasMiniGame.SetActive(true);
         if (miniGameCamera != null) miniGameCamera.SetActive(true);
 
-        // Paksa nyalakan panel
         if (miniGameUI != null) miniGameUI.SetActive(true);
 
-        // TAMBAHKAN INI: Paksa nyalakan teks dan tombol
         if (txtCounter != null) txtCounter.gameObject.SetActive(true);
         if (btnFinish != null) btnFinish.gameObject.SetActive(true);
     }
@@ -70,11 +67,9 @@ public class MiniGameManager : MonoBehaviour
 
     void OnFinishClicked()
     {
-        // 1. Hitung Total Biaya
         int totalCost = (countBeras * GameManager.Instance.activeMission.hargaBeras) +
                         (countObat * GameManager.Instance.activeMission.hargaObat);
 
-        // 2. Validasi
         bool isCorrect = false;
         MissionData mission = GameManager.Instance.activeMission;
 
@@ -83,7 +78,6 @@ public class MiniGameManager : MonoBehaviour
         else if (mission.correctItemName == "Obat")
             isCorrect = (countObat == mission.correctAmount && countBeras == 0);
 
-        // 3. Eksekusi Data
         GameManager.Instance.currentMoney -= totalCost;
         GameManager.Instance.isMissionCompleted = true;
         GameManager.Instance.lastMissionCost = totalCost;
@@ -103,7 +97,6 @@ public class MiniGameManager : MonoBehaviour
             GameManager.Instance.lastMissionTrustGained = -10;
         }
 
-        // 4. Transisi Kembali: Mini Game mati, Peta nyala
         if (miniGameUI != null) miniGameUI.SetActive(false);
         if (canvasMiniGame != null) canvasMiniGame.SetActive(false);
         if (miniGameCamera != null) miniGameCamera.SetActive(false);
@@ -111,7 +104,6 @@ public class MiniGameManager : MonoBehaviour
         if (canvasGameplay != null) canvasGameplay.SetActive(true);
         if (mainCamera != null) mainCamera.SetActive(true);
 
-        // 5. Sembunyikan Tanda Seru
         QuestMarker[] allMarkers = Resources.FindObjectsOfTypeAll<QuestMarker>();
         foreach (var m in allMarkers)
         {
@@ -122,7 +114,6 @@ public class MiniGameManager : MonoBehaviour
             }
         }
 
-        // 6. Update HUD
         HUDManager hud = FindObjectOfType<HUDManager>();
         if (hud != null)
         {
@@ -130,7 +121,6 @@ public class MiniGameManager : MonoBehaviour
             hud.UpdateHUD();
         }
 
-        // 7. Jalankan Animasi Truk
         if (truckWaypoint != null)
         {
             truckWaypoint.StartDelivery();
