@@ -58,19 +58,28 @@ public class MissionMenuManager : MonoBehaviour
 
     public void StartMission()
     {
+        // 1. Matikan Menu
         canvasMenu.SetActive(false);
 
-        // 1. Simpan misi DULU ke GameManager
+        // 2. Simpan Misi ke GameManager agar bisa dibaca oleh Toko dan Peta
         if (GameManager.Instance != null)
+        {
             GameManager.Instance.StartMission(selectedMission);
+        }
 
-        // 2. Nyalakan Peta & UI
-        if (environment3D != null) environment3D.SetActive(true);
-        if (canvasGameplay != null) canvasGameplay.SetActive(true);
-        if (endDayButton != null) endDayButton.SetActive(true);
+        // 3. JANGAN NYALAKAN PETA DULU! Matikan Peta dan HUD Gameplay.
+        if (environment3D != null) environment3D.SetActive(false);
+        if (canvasGameplay != null) canvasGameplay.SetActive(false);
+        if (endDayButton != null) endDayButton.SetActive(false);
 
-        // 3. TAMBAHKAN INI: Paksa HUD nyalakan titik merah
-        HUDManager hud = FindObjectOfType<HUDManager>();
-        if (hud != null) hud.UpdateReportNotif();
+        // 4. PINDAH KE TOKO (MiniGame)
+        if (MiniGameManager.Instance != null)
+        {
+            MiniGameManager.Instance.StartMiniGame();
+        }
+        else
+        {
+            Debug.LogError("MiniGameManager tidak ditemukan di Scene! Pastikan script Manager_MiniGame aktif.");
+        }
     }
 }

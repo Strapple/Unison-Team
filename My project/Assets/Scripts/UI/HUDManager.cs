@@ -52,7 +52,10 @@ public class HUDManager : MonoBehaviour
             notifRedDot.SetActive(shouldShow);
         }
     }
-
+    public void ShowEndDayButton()
+    {
+        if (endDayButton != null) endDayButton.gameObject.SetActive(true);
+    }
     void OnEndDayClicked()
     {
         if (!GameManager.Instance.isMissionCompleted)

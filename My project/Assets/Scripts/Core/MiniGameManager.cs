@@ -7,20 +7,24 @@ public class MiniGameManager : MonoBehaviour
 
     [Header("UI & Camera References")]
     public GameObject canvasMiniGame;
-    public GameObject canvasGameplay;
+    public GameObject canvasGameplay; // HUD Peta
     public GameObject mainCamera;
     public GameObject miniGameCamera;
 
-    [Header("Mini Game UI")]
+    [Header("Gameplay References")]
+    public GameObject environment3D;
+
+    [Header("Shop UI (Kasir)")]
     public GameObject miniGameUI;
-    public Text txtCounter;
-    public Button btnFinish;
+    public Text txtReceipt;      // Teks untuk daftar belanjaan
+    public Text txtTotalCost;    // Teks untuk total harga
+    public Text txtPlayerMoney;  // Teks untuk uang pemain saat ini
+    public Button btnBuy;        // Tombol Bayar
+    public Button btnNext;       // Tombol Lanjut ke Peta (Awalnya mati)
 
-    [Header("References")]
-    public TruckWaypoint truckWaypoint;
-
-    private int countBeras = 0;
-    private int countObat = 0;
+    private int receiptBeras = 0;
+    private int receiptObat = 0;
+    private bool isPaid = false;
 
     void Awake()
     {
@@ -29,15 +33,20 @@ public class MiniGameManager : MonoBehaviour
 
     void Start()
     {
-        btnFinish.onClick.AddListener(OnFinishClicked);
+        btnBuy.onClick.AddListener(OnBuyClicked);
+        btnNext.onClick.AddListener(OnNextClicked);
+
         if (miniGameUI != null) miniGameUI.SetActive(false);
     }
 
+    // Fungsi untuk masuk ke Toko (Dipanggil saat klik Start Misi)
     public void StartMiniGame()
     {
-        countBeras = 0;
-        countObat = 0;
-        UpdateUI();
+        receiptBeras = 0;
+        receiptObat = 0;
+        isPaid = false;
+
+        UpdateShopUI();
 
         if (canvasGameplay != null) canvasGameplay.SetActive(false);
         if (mainCamera != null) mainCamera.SetActive(false);
@@ -47,87 +56,113 @@ public class MiniGameManager : MonoBehaviour
 
         if (miniGameUI != null) miniGameUI.SetActive(true);
 
-        if (txtCounter != null) txtCounter.gameObject.SetActive(true);
-        if (btnFinish != null) btnFinish.gameObject.SetActive(true);
+        // Tampilkan tombol bayar, sembunyikan tombol next
+        if (btnBuy != null) btnBuy.gameObject.SetActive(true);
+        if (btnNext != null) btnNext.gameObject.SetActive(false);
     }
 
-    public void AddItemToTruck(string itemName)
+    // Dipanggil oleh PlayerPickup saat menaruh barang di Kasir
+    public void AddItemToReceipt(string itemName)
     {
-        if (itemName.Contains("Beras")) countBeras++;
-        else if (itemName.Contains("Obat")) countObat++;
+        if (isPaid) return; // Kalau sudah bayar, jangan bisa nambah barang
 
-        UpdateUI();
+        if (itemName.Contains("Beras")) receiptBeras++;
+        else if (itemName.Contains("Obat")) receiptObat++;
+
+        UpdateShopUI();
     }
 
-    void UpdateUI()
+    void UpdateShopUI()
     {
-        if (txtCounter != null)
-            txtCounter.text = $"Beras: {countBeras} | Obat: {countObat}";
-    }
+        if (txtPlayerMoney != null) txtPlayerMoney.text = $"Uang: ${GameManager.Instance.currentMoney}";
 
-    void OnFinishClicked()
-    {
-        int totalCost = (countBeras * GameManager.Instance.activeMission.hargaBeras) +
-                        (countObat * GameManager.Instance.activeMission.hargaObat);
+        // Susun teks struk belanja
+        string receiptText = "STRUK BELANJA:\n";
+        int totalCost = 0;
 
-        bool isCorrect = false;
-        MissionData mission = GameManager.Instance.activeMission;
-
-        if (mission.correctItemName == "Beras")
-            isCorrect = (countBeras == mission.correctAmount && countObat == 0);
-        else if (mission.correctItemName == "Obat")
-            isCorrect = (countObat == mission.correctAmount && countBeras == 0);
-
-        GameManager.Instance.currentMoney -= totalCost;
-        GameManager.Instance.isMissionCompleted = true;
-        GameManager.Instance.lastMissionCost = totalCost;
-        GameManager.Instance.lastMissionTitle = mission.missionTitle;
-
-        if (isCorrect)
+        if (receiptBeras > 0)
         {
-            GameManager.Instance.currentMoney += (totalCost + mission.profitUang);
-            GameManager.Instance.currentTrust += mission.rewardTrust;
-            GameManager.Instance.lastMissionProfit = mission.profitUang;
-            GameManager.Instance.lastMissionTrustGained = mission.rewardTrust;
+            int harga = GameManager.Instance.activeMission.hargaBeras;
+            receiptText += $"- Beras x{receiptBeras} = ${harga * receiptBeras}\n";
+            totalCost += (receiptBeras * harga);
+        }
+
+        if (receiptObat > 0)
+        {
+            int harga = GameManager.Instance.activeMission.hargaObat;
+            receiptText += $"- Obat x{receiptObat} = ${harga * receiptObat}\n";
+            totalCost += (receiptObat * harga);
+        }
+
+        if (receiptBeras == 0 && receiptObat == 0) receiptText += "(Kosong)";
+
+        if (txtReceipt != null) txtReceipt.text = receiptText;
+        if (txtTotalCost != null) txtTotalCost.text = $"Total: ${totalCost}";
+    }
+
+    // Tombol Bayar di Kasir
+    void OnBuyClicked()
+    {
+        if (receiptBeras == 0 && receiptObat == 0) return; // Tidak bisa bayar kosong
+
+        // Hitung total harga
+        int totalCost = (receiptBeras * GameManager.Instance.activeMission.hargaBeras) +
+                        (receiptObat * GameManager.Instance.activeMission.hargaObat);
+
+        // Cek uang cukup
+        if (GameManager.Instance.currentMoney >= totalCost)
+        {
+            isPaid = true;
+
+            // Potong Uang & Masukkan ke Inventory
+            GameManager.Instance.currentMoney -= totalCost;
+            GameManager.Instance.AddItem("Beras", receiptBeras);
+            GameManager.Instance.AddItem("Obat", receiptObat);
+
+            UpdateShopUI();
+
+            // Sembunyikan tombol bayar, munculkan tombol Next
+            if (btnBuy != null) btnBuy.gameObject.SetActive(false);
+            if (btnNext != null) btnNext.gameObject.SetActive(true);
+
+            Debug.Log("Pembayaran berhasil!");
         }
         else
         {
-            GameManager.Instance.currentTrust -= 10;
-            GameManager.Instance.lastMissionProfit = 0;
-            GameManager.Instance.lastMissionTrustGained = -10;
+            Debug.Log("Uang tidak cukup!");
+            // Bisa tambahkan efek suara error atau teks merah
         }
+    }
 
+    // Tombol Lanjut ke Peta
+    void OnNextClicked()
+    {
+        if (!isPaid) return;
+
+        // Matikan Toko
         if (miniGameUI != null) miniGameUI.SetActive(false);
         if (canvasMiniGame != null) canvasMiniGame.SetActive(false);
         if (miniGameCamera != null) miniGameCamera.SetActive(false);
 
+        // Nyalakan Peta dan HUD
         if (canvasGameplay != null) canvasGameplay.SetActive(true);
         if (mainCamera != null) mainCamera.SetActive(true);
 
+        if (environment3D != null) environment3D.SetActive(true); // <-- Pastikan ini ada
+
+        // Nyalakan tanda seru
         QuestMarker[] allMarkers = Resources.FindObjectsOfTypeAll<QuestMarker>();
         foreach (var m in allMarkers)
         {
-            if (m.missionToComplete == mission)
-            {
-                if (isCorrect) m.PlaySuccessAnimation();
-                else m.gameObject.SetActive(false);
-            }
+            if (m.missionToComplete == GameManager.Instance.activeMission)
+                m.gameObject.SetActive(true);
         }
 
         HUDManager hud = FindObjectOfType<HUDManager>();
         if (hud != null)
         {
-            hud.UpdateReportNotif();
             hud.UpdateHUD();
-        }
-
-        if (truckWaypoint != null)
-        {
-            truckWaypoint.StartDelivery();
-        }
-        else
-        {
-            Debug.LogError("Truk belum dimasukkan ke Inspector MiniGameManager!");
+            hud.ShowEndDayButton(); // <-- TAMBAHKAN INI
         }
     }
 }
