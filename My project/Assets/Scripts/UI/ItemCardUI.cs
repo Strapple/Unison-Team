@@ -5,17 +5,20 @@ public class ItemCardUI : MonoBehaviour, IPointerClickHandler
 {
     public string itemName;
     public int currentAmount = 0;
-    public int maxAmount = 99;
 
     public void OnPointerClick(PointerEventData eventData)
     {
+        // Cek stok dari GameManager
+        int availableStock = 0;
+        if (itemName == "Beras") availableStock = GameManager.Instance.inventoryBeras;
+        else if (itemName == "Obat") availableStock = GameManager.Instance.inventoryObat;
+
         if (eventData.button == PointerEventData.InputButton.Left)
         {
-            // Klik Kiri: Tambah
-            if (currentAmount < maxAmount)
+            // Klik Kiri: Tambah (selama stok masih ada)
+            if (currentAmount < availableStock)
             {
                 currentAmount++;
-                // Kirim update ke Manager untuk mengurus UI kotak dan biaya
                 QuestPopupManager.Instance.OnItemAmountChanged(itemName, 1);
             }
         }
@@ -30,7 +33,6 @@ public class ItemCardUI : MonoBehaviour, IPointerClickHandler
         }
     }
 
-    // Fungsi agar angka ter-reset saat popup ditutup/batal
     public void ResetAmount()
     {
         currentAmount = 0;

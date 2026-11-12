@@ -7,21 +7,23 @@ public class CameraController : MonoBehaviour
     public float defaultSize = 15f;
 
     [Header("Zoom Settings")]
-    public float zoomSize = 5f;       // ortho size saat zoom in
-    public float yOffset = 15f;       // tinggi kamera saat zoom
-    public float moveSpeed = 4f;      // kecepatan smooth
+    public float zoomSize = 5f;
+    public float yOffset = 15f;
+    public float moveSpeed = 4f;
 
     private Camera cam;
     private Vector3 targetPosition;
     private float targetSize;
     private bool isZoomed = false;
 
+    // TAMBAHKAN INI
+    private bool isPaused = false;
+
     void Start()
     {
         cam = GetComponent<Camera>();
         if (cam == null) cam = Camera.main;
 
-        // Simpan posisi awal sebagai default
         defaultPosition = transform.position;
         defaultSize = cam.orthographicSize;
 
@@ -31,14 +33,23 @@ public class CameraController : MonoBehaviour
 
     void Update()
     {
-        // Smooth lerp posisi & ukuran
+        // TAMBAHKAN INI: Jika sedang di-pause, jangan gerakkan kamera
+        if (isPaused) return;
+
         transform.position = Vector3.Lerp(transform.position, targetPosition, Time.deltaTime * moveSpeed);
         cam.orthographicSize = Mathf.Lerp(cam.orthographicSize, targetSize, Time.deltaTime * moveSpeed);
     }
 
+    // TAMBAHKAN FUNGSI BARU INI
+    public void SetPause(bool pauseState)
+    {
+        isPaused = pauseState;
+    }
+
     public void ZoomTo(Vector3 regionWorldPos)
     {
-        // Kamera pindah ke atas region, dengan offset Y
+        if (isPaused) return; // Jangan zoom kalau lagi di toko
+
         targetPosition = new Vector3(regionWorldPos.x, yOffset, regionWorldPos.z - yOffset);
         targetSize = zoomSize;
         isZoomed = true;
