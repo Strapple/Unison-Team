@@ -23,6 +23,8 @@ public class GameManager : MonoBehaviour
     public MissionData activeMission;
     public bool isMissionCompleted = false;
 
+    [Header("Random Event Data")]
+    public int bonusDonasi = 0;
     void Awake()
     {
         // Singleton pattern

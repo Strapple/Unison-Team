@@ -4,17 +4,52 @@ using System.Collections;
 public class TruckWaypoint : MonoBehaviour
 {
     [Header("Rute & Pengaturan")]
-    public Transform[] waypoints; // Tarik Waypoint_1, 2, 3 ke sini
-    public float moveSpeed = 5f;
+    public Transform[] waypoints;
+    public float baseMoveSpeed = 5f; // Kecepatan normal
     public float waitAtDestination = 3f; // Waktu diam di desa
 
-    private int currentWaypointIndex = 0;
+    [Header("Status Kecepatan (Diubah oleh Event)")]
+    [Range(0.1f, 3f)]
+    public float speedMultiplier = 1f; // 1 = Normal, 0.5 = Lambat, 1.5 = Cepat
 
-    // Fungsi yang dipanggil untuk memulai perjalanan
+    private int currentWaypointIndex = 0;
+    private float currentMoveSpeed;
+
+    void Start()
+    {
+        // Set kecepatan awal
+        currentMoveSpeed = baseMoveSpeed * speedMultiplier;
+    }
+
+    // Fungsi baru: Menghitung estimasi waktu perjalanan (dalam detik)
+    public float GetEstimatedTime()
+    {
+        if (waypoints.Length == 0) return 0f;
+
+        float totalDistance = 0f;
+        // Hitung total jarak dari kantor ke desa tujuan
+        for (int i = 1; i < waypoints.Length; i++)
+        {
+            totalDistance += Vector3.Distance(waypoints[i - 1].position, waypoints[i].position);
+        }
+
+        // Kecepatan saat ini (base * multiplier)
+        float currentSpeed = baseMoveSpeed * speedMultiplier;
+
+        // Waktu tempuh = Jarak / Kecepatan, ditambah waktu diam di desa
+        float travelTime = (totalDistance / currentSpeed) + waitAtDestination;
+
+        return travelTime;
+    }
+
     public void StartDelivery()
     {
-        gameObject.SetActive(true); // Munculkan truk
-        transform.position = waypoints[0].position; // Taruh di Kantor
+        gameObject.SetActive(true);
+        transform.position = waypoints[0].position;
+
+        // Pastikan kecepatan diperbarui saat berangkat
+        currentMoveSpeed = baseMoveSpeed * speedMultiplier;
+
         StartCoroutine(MoveTruckRoutine());
     }
 
@@ -44,10 +79,8 @@ public class TruckWaypoint : MonoBehaviour
 
     IEnumerator MoveToWaypoint(Transform targetWaypoint)
     {
-        // Selama truk belum sampai di titik waypoint
         while (Vector3.Distance(transform.position, targetWaypoint.position) > 0.1f)
         {
-            // Arahkan truk ke waypoint
             Vector3 direction = (targetWaypoint.position - transform.position).normalized;
             if (direction != Vector3.zero)
             {
@@ -55,9 +88,9 @@ public class TruckWaypoint : MonoBehaviour
                 transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 5f);
             }
 
-            // Gerakkan truk
-            transform.position = Vector3.MoveTowards(transform.position, targetWaypoint.position, moveSpeed * Time.deltaTime);
-            yield return null; // Tunggu frame berikutnya
+            // Gunakan currentMoveSpeed (yang sudah dikali multiplier)
+            transform.position = Vector3.MoveTowards(transform.position, targetWaypoint.position, currentMoveSpeed * Time.deltaTime);
+            yield return null;
         }
     }
 }

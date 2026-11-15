@@ -18,6 +18,7 @@ public class QuestPopupManager : MonoBehaviour
     public Text txtBoxBeras;
     public GameObject boxObat;
     public Text txtBoxObat;
+    public Text txtEstimasi; // Tarik Txt_Estimasi ke sini
 
     [Header("References")]
     public TruckWaypoint truckWaypoint; // <-- TAMBAHKAN INI (Pindahan dari MiniGameManager)
@@ -77,6 +78,13 @@ public class QuestPopupManager : MonoBehaviour
         titleText.text = $"REPORT 1\n{currentMission.missionTitle}\nPilih stok untuk dikirim:";
         popupPanel.SetActive(true);
         if (logText != null) logText.text = "Pilih barang lalu klik Kirim.";
+
+        // Hitung dan tampilkan estimasi waktu
+        if (truckWaypoint != null && txtEstimasi != null)
+        {
+            float estTime = truckWaypoint.GetEstimatedTime();
+            txtEstimasi.text = $"Estimasi Waktu: {Mathf.CeilToInt(estTime)} Detik";
+        }
 
         UpdateUI();
     }

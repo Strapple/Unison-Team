@@ -1,6 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.SceneManagement; // Wajib untuk memuat ulang scene
+using UnityEngine.SceneManagement;
 
 public class SummaryManager : MonoBehaviour
 {
@@ -26,17 +26,27 @@ public class SummaryManager : MonoBehaviour
         int trust = GameManager.Instance.lastMissionTrustGained;
         string title = GameManager.Instance.lastMissionTitle;
 
-        // Hitung Profit Bersih (Pendapatan dikurangi biaya belanja)
-        int netProfit = income - cost;
+        // Ambil data bonus donasi dari GameManager (jika tidak ada event, nilainya 0)
+        int donasi = GameManager.Instance.bonusDonasi;
+
+        // Hitung Profit Bersih: (Pendapatan Misi + Donasi) - Biaya Belanja
+        int netProfit = (income + donasi) - cost;
 
         // Update Teks UI
         txtMissionTitle.text = "Misi Selesai: " + title;
         txtCost.text = $"Biaya Belanja: -${cost}";
 
-        // Jika misi sukses (income > 0), tampilkan pendapatan. Jika gagal, 0.
-        txtRevenue.text = $"Pendapatan Misi: +${income}";
+        // Tampilkan Pendapatan beserta Donasi jika ada
+        if (donasi > 0)
+        {
+            txtRevenue.text = $"Pendapatan Misi: +${income}\n(Donasi Masyarakat: +${donasi})";
+        }
+        else
+        {
+            txtRevenue.text = $"Pendapatan Misi: +${income}";
+        }
 
-        // Tampilkan hasil akhir (Bisa minus kalau misi gagal/rugi)
+        // Tampilkan hasil akhir (Profit atau Rugi)
         if (netProfit >= 0)
             txtProfit.text = $"Profit Bersih: +${netProfit}";
         else
@@ -49,8 +59,7 @@ public class SummaryManager : MonoBehaviour
     {
         summaryPanel.SetActive(false);
 
-        // Untuk prototype, kita muat ulang Scene saat ini agar game kembali ke awal
-        // (Kembali ke Main Menu dan mereset uang menjadi $300)
+        // Merestart game (kembali ke Main Menu)
         Debug.Log("Merestart Game...");
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }

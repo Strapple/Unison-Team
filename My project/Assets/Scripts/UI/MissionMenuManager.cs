@@ -72,6 +72,12 @@ public class MissionMenuManager : MonoBehaviour
         if (canvasGameplay != null) canvasGameplay.SetActive(false);
         if (endDayButton != null) endDayButton.SetActive(false);
 
+        // Roll Event sebelum masuk ke Toko
+        if (EventManager.Instance != null)
+        {
+            EventManager.Instance.RollRandomEvent();
+        }
+
         // 4. PINDAH KE TOKO (MiniGame)
         if (MiniGameManager.Instance != null)
         {
