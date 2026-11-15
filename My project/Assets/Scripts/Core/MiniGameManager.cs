@@ -165,7 +165,6 @@ public class MiniGameManager : MonoBehaviour
         if (hud != null)
         {
             hud.UpdateHUD();
-            hud.ShowEndDayButton();
         }
     }
 }

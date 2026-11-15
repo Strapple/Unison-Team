@@ -180,6 +180,7 @@ public class QuestPopupManager : MonoBehaviour
         {
             hud.UpdateReportNotif();
             hud.UpdateHUD();
+            hud.ShowEndDayButton();
         }
 
         // 7. Jalankan Truk (Pindahan dari MiniGameManager)
