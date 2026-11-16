@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Mission_2_Start
   m_EditorClassIdentifier: Assembly-CSharp::MissionData
   missionTitle: LAPER MBG
-  description: Desa terancam wabah penyakit. Tolong kirimkan bantuan medis segera.
+  description: LAPERRR POKOKNYA
   missionImage: {fileID: 21300000, guid: 83fe07aecbdc6f844877bbd227721825, type: 3}
   missionType: Danger
   locationDesc: Tanda Danger di Peta
