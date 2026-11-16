@@ -1,44 +1,41 @@
 using UnityEngine;
 using System.Collections;
+using UnityEngine.Events; // <-- TAMBAHKAN INI
 
 public class TruckWaypoint : MonoBehaviour
 {
     [Header("Rute & Pengaturan")]
     public Transform[] waypoints;
-    public float baseMoveSpeed = 5f; // Kecepatan normal
-    public float waitAtDestination = 3f; // Waktu diam di desa
+    public float baseMoveSpeed = 5f;
+    public float waitAtDestination = 3f;
 
     [Header("Status Kecepatan (Diubah oleh Event)")]
     [Range(0.1f, 3f)]
-    public float speedMultiplier = 1f; // 1 = Normal, 0.5 = Lambat, 1.5 = Cepat
+    public float speedMultiplier = 1f;
+
+    [Header("Event Pemicu")] // <-- TAMBAHKAN INI
+    public UnityEvent onTruckFinished;
 
     private int currentWaypointIndex = 0;
     private float currentMoveSpeed;
 
     void Start()
     {
-        // Set kecepatan awal
         currentMoveSpeed = baseMoveSpeed * speedMultiplier;
     }
 
-    // Fungsi baru: Menghitung estimasi waktu perjalanan (dalam detik)
     public float GetEstimatedTime()
     {
         if (waypoints.Length == 0) return 0f;
 
         float totalDistance = 0f;
-        // Hitung total jarak dari kantor ke desa tujuan
         for (int i = 1; i < waypoints.Length; i++)
         {
             totalDistance += Vector3.Distance(waypoints[i - 1].position, waypoints[i].position);
         }
 
-        // Kecepatan saat ini (base * multiplier)
         float currentSpeed = baseMoveSpeed * speedMultiplier;
-
-        // Waktu tempuh = Jarak / Kecepatan, ditambah waktu diam di desa
         float travelTime = (totalDistance / currentSpeed) + waitAtDestination;
-
         return travelTime;
     }
 
@@ -46,10 +43,7 @@ public class TruckWaypoint : MonoBehaviour
     {
         gameObject.SetActive(true);
         transform.position = waypoints[0].position;
-
-        // Pastikan kecepatan diperbarui saat berangkat
         currentMoveSpeed = baseMoveSpeed * speedMultiplier;
-
         StartCoroutine(MoveTruckRoutine());
     }
 
@@ -72,8 +66,12 @@ public class TruckWaypoint : MonoBehaviour
             yield return StartCoroutine(MoveToWaypoint(waypoints[i]));
         }
 
-        // 4. SEMBUNYIKAN TRUK
+        // 4. SEMBUNYIKAN TRUK & PICUL EVENT
         Debug.Log("Truk sampai di kantor dan menghilang.");
+
+        // Memicu event (Memunculkan tombol End Day)
+        onTruckFinished?.Invoke();
+
         gameObject.SetActive(false);
     }
 
@@ -88,7 +86,6 @@ public class TruckWaypoint : MonoBehaviour
                 transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 5f);
             }
 
-            // Gunakan currentMoveSpeed (yang sudah dikali multiplier)
             transform.position = Vector3.MoveTowards(transform.position, targetWaypoint.position, currentMoveSpeed * Time.deltaTime);
             yield return null;
         }

@@ -11,6 +11,9 @@ public class PlayerMovement : MonoBehaviour
     [Header("Gravity")]
     public float gravity;
 
+    // TAMBAHKAN INI: Saklar untuk menghentikan pergerakan
+    [HideInInspector] public bool canMove = true;
+
     private CharacterController controller;
     private Animator anim;
     private float verticalVelocity = 0f;
@@ -28,21 +31,25 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        if (Keyboard.current == null) return;
-
         float horizontal = 0f;
         float vertical = 0f;
+        bool isRunning = false;
 
-        if (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed) vertical += 1f;
-        if (Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed) vertical -= 1f;
-        if (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed) horizontal += 1f;
-        if (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed) horizontal -= 1f;
+        // HANYA BACA INPUT JIKA canMove TRUE
+        if (canMove && Keyboard.current != null)
+        {
+            if (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed) vertical += 1f;
+            if (Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed) vertical -= 1f;
+            if (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed) horizontal += 1f;
+            if (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed) horizontal -= 1f;
+
+            isRunning = Keyboard.current.shiftKey.isPressed;
+        }
 
         Vector3 moveDirection = new Vector3(horizontal, 0f, vertical).normalized;
-
-        bool isRunning = Keyboard.current.shiftKey.isPressed;
         float currentSpeed = isRunning ? runSpeed : walkSpeed;
 
+        // Gravity tetap berjalan agar karakter tidak melayang
         if (controller.isGrounded && verticalVelocity < 0)
         {
             verticalVelocity = -2f;

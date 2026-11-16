@@ -14,7 +14,11 @@ public class MiniGameManager : MonoBehaviour
     public Camera mainCamera;
     public Transform shopViewPoint;
     public Transform mapViewPoint;
-    public CameraController cameraController; // <-- TAMBAHKAN INI
+    public CameraController cameraController;
+
+    // TAMBAHKAN INI: Referensi ke pergerakan karakter
+    [Header("Player Reference")]
+    public PlayerMovement playerMovement;
 
     [Header("Shop UI (Kasir)")]
     public GameObject miniGameUI;
@@ -31,10 +35,7 @@ public class MiniGameManager : MonoBehaviour
     void Awake()
     {
         if (Instance == null) Instance = this;
-
-        // Otomatis cari CameraController jika lupa di-drag di Inspector
-        if (cameraController == null)
-            cameraController = FindObjectOfType<CameraController>();
+        if (cameraController == null) cameraController = FindObjectOfType<CameraController>();
     }
 
     void Start()
@@ -52,10 +53,11 @@ public class MiniGameManager : MonoBehaviour
 
         UpdateShopUI();
 
-        // 1. PAUSE CAMERA CONTROLLER AGAR TIDAK MENARIK KAMERA KE PETA
+        // TAMBAHKAN INI: Pastikan karakter bisa jalan saat masuk toko
+        if (playerMovement != null) playerMovement.canMove = true;
+
         if (cameraController != null) cameraController.SetPause(true);
 
-        // 2. PINDAHKAN KAMERA KE TOKO
         if (mainCamera != null && shopViewPoint != null)
         {
             mainCamera.transform.position = shopViewPoint.position;
@@ -116,8 +118,6 @@ public class MiniGameManager : MonoBehaviour
         {
             isPaid = true;
             GameManager.Instance.currentMoney -= totalCost;
-
-            // TAMBAHKAN BARIS INI: Catat biaya belanja ke GameManager untuk Summary
             GameManager.Instance.lastMissionCost = totalCost;
 
             GameManager.Instance.AddItem("Beras", receiptBeras);
@@ -126,6 +126,9 @@ public class MiniGameManager : MonoBehaviour
             UpdateShopUI();
             if (btnBuy != null) btnBuy.gameObject.SetActive(false);
             if (btnNext != null) btnNext.gameObject.SetActive(true);
+
+            // TAMBAHKAN INI: Bekukan karakter setelah bayar
+            if (playerMovement != null) playerMovement.canMove = false;
         }
     }
 
@@ -133,14 +136,12 @@ public class MiniGameManager : MonoBehaviour
     {
         if (!isPaid) return;
 
-        // 1. PINDAHKAN KAMERA KEMBALI KE PETA
         if (mainCamera != null && mapViewPoint != null)
         {
             mainCamera.transform.position = mapViewPoint.position;
             mainCamera.transform.rotation = mapViewPoint.rotation;
         }
 
-        // 2. UNPAUSE CAMERA CONTROLLER
         if (cameraController != null)
         {
             cameraController.SetPause(false);
@@ -150,7 +151,6 @@ public class MiniGameManager : MonoBehaviour
         if (miniGameUI != null) miniGameUI.SetActive(false);
         if (canvasMiniGame != null) canvasMiniGame.SetActive(false);
 
-        // Nyalakan Peta dan HUD
         if (canvasGameplay != null) canvasGameplay.SetActive(true);
         if (environment3D != null) environment3D.SetActive(true);
 
