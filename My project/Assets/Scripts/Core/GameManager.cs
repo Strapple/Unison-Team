@@ -33,7 +33,7 @@ public class GameManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject); // <-- TAMBAHKAN INI
+            DontDestroyOnLoad(gameObject);
         }
         else
         {
@@ -54,6 +54,9 @@ public class GameManager : MonoBehaviour
         lastMissionTrustGained = 0;
         bonusDonasi = 0;
 
+        // Matikan semua tanda seru dari hari sebelumnya
+        DeactivateAllMarkers();
+
         Debug.Log("Selamat datang di Hari ke-" + currentDay);
     }
 
@@ -73,6 +76,9 @@ public class GameManager : MonoBehaviour
     {
         dailyMissions = new List<MissionData>(missions);
         currentMissionIndex = 0;
+
+        // Matikan semua dulu, baru nyalakan yang aktif
+        DeactivateAllMarkers();
         ActivateMarkerForMission(GetCurrentMission());
     }
 
@@ -115,6 +121,16 @@ public class GameManager : MonoBehaviour
             {
                 marker.gameObject.SetActive(true);
             }
+        }
+    }
+
+    // FUNGSI BARU: Mematikan semua tanda seru
+    private void DeactivateAllMarkers()
+    {
+        QuestMarker[] allMarkers = Resources.FindObjectsOfTypeAll<QuestMarker>();
+        foreach (QuestMarker marker in allMarkers)
+        {
+            marker.gameObject.SetActive(false);
         }
     }
 
