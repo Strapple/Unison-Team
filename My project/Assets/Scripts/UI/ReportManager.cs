@@ -20,10 +20,12 @@ public class ReportManager : MonoBehaviour
 
     public void OpenReportPopup()
     {
-        // Cek apakah misi sudah selesai
-        if (GameManager.Instance.isMissionCompleted || GameManager.Instance.activeMission == null)
+        // Ambil misi yang sedang aktif saat ini
+        MissionData mission = GameManager.Instance.GetCurrentMission();
+
+        // Jika tidak ada misi (semua sudah selesai)
+        if (mission == null)
         {
-            // Tampilkan pesan kosong
             if (imgReportCharacter != null) imgReportCharacter.gameObject.SetActive(false);
             txtTitle.text = "TIDAK ADA REPORT";
             txtType.text = "";
@@ -34,9 +36,7 @@ public class ReportManager : MonoBehaviour
             return;
         }
 
-        // Jika belum selesai, tampilkan data misi normal
-        MissionData mission = GameManager.Instance.activeMission;
-
+        // Jika ada misi, tampilkan datanya
         if (imgReportCharacter != null)
         {
             imgReportCharacter.gameObject.SetActive(true);

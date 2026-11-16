@@ -6,7 +6,8 @@ public class HUDManager : MonoBehaviour
     [Header("Top Bar UI")]
     public Text txtMoney;
     public Slider sliderTrust;
-    public Text txtTrustPercent; // Opsional
+    public Text txtTrustPercent;
+    public Text txtDay; // <-- TAMBAHKAN INI (Tarik Teks "DAY 1" ke sini)
 
     [Header("Other UI")]
     public Button endDayButton;
@@ -20,27 +21,26 @@ public class HUDManager : MonoBehaviour
         endDayButton.onClick.AddListener(OnEndDayClicked);
         if (summaryPanel != null) summaryPanel.SetActive(false);
 
-        // Update HUD saat game pertama kali dimulai
         UpdateHUD();
         UpdateReportNotif();
     }
 
-    // Fungsi untuk memperbarui Uang dan Trust di layar
     public void UpdateHUD()
     {
         if (GameManager.Instance != null)
         {
-            // 1. Update Uang
             if (txtMoney != null)
                 txtMoney.text = $"${GameManager.Instance.currentMoney}";
 
-            // 2. Update Bar Trust
             if (sliderTrust != null)
                 sliderTrust.value = GameManager.Instance.currentTrust;
 
-            // 3. Update Teks Persentase (Opsional)
             if (txtTrustPercent != null)
                 txtTrustPercent.text = $"{GameManager.Instance.currentTrust}%";
+
+            // Update Teks Hari
+            if (txtDay != null)
+                txtDay.text = $"DAY {GameManager.Instance.currentDay}";
         }
     }
 
@@ -48,19 +48,33 @@ public class HUDManager : MonoBehaviour
     {
         if (notifRedDot != null && GameManager.Instance != null)
         {
-            bool shouldShow = (GameManager.Instance.activeMission != null && !GameManager.Instance.isMissionCompleted);
+            bool shouldShow = (GameManager.Instance.GetCurrentMission() != null);
             notifRedDot.SetActive(shouldShow);
         }
     }
+
     public void ShowEndDayButton()
     {
         if (endDayButton != null) endDayButton.gameObject.SetActive(true);
     }
+
+    public void CheckEndDayCondition()
+    {
+        if (GameManager.Instance.IsAllMissionsCompleted())
+        {
+            ShowEndDayButton();
+        }
+        else
+        {
+            Debug.Log("Masih ada misi yang tersisa. Tombol End Day belum muncul.");
+        }
+    }
+
     void OnEndDayClicked()
     {
-        if (!GameManager.Instance.isMissionCompleted)
+        if (!GameManager.Instance.IsAllMissionsCompleted())
         {
-            Debug.Log("Misi belum selesai!");
+            Debug.Log("Misi belum selesai semua!");
             return;
         }
 

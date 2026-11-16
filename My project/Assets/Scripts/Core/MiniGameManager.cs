@@ -15,9 +15,6 @@ public class MiniGameManager : MonoBehaviour
     public Transform shopViewPoint;
     public Transform mapViewPoint;
     public CameraController cameraController;
-
-    // TAMBAHKAN INI: Referensi ke pergerakan karakter
-    [Header("Player Reference")]
     public PlayerMovement playerMovement;
 
     [Header("Shop UI (Kasir)")]
@@ -53,9 +50,7 @@ public class MiniGameManager : MonoBehaviour
 
         UpdateShopUI();
 
-        // TAMBAHKAN INI: Pastikan karakter bisa jalan saat masuk toko
         if (playerMovement != null) playerMovement.canMove = true;
-
         if (cameraController != null) cameraController.SetPause(true);
 
         if (mainCamera != null && shopViewPoint != null)
@@ -88,18 +83,24 @@ public class MiniGameManager : MonoBehaviour
         string receiptText = "STRUK BELANJA:\n";
         int totalCost = 0;
 
-        if (receiptBeras > 0)
-        {
-            int harga = GameManager.Instance.activeMission.hargaBeras;
-            receiptText += $"- Beras x{receiptBeras} = ${harga * receiptBeras}\n";
-            totalCost += (receiptBeras * harga);
-        }
+        // Ambil misi pertama untuk referensi harga (asumsi harga sama untuk semua misi)
+        MissionData currentMission = GameManager.Instance.GetCurrentMission();
 
-        if (receiptObat > 0)
+        if (currentMission != null)
         {
-            int harga = GameManager.Instance.activeMission.hargaObat;
-            receiptText += $"- Obat x{receiptObat} = ${harga * receiptObat}\n";
-            totalCost += (receiptObat * harga);
+            if (receiptBeras > 0)
+            {
+                int harga = currentMission.hargaBeras;
+                receiptText += $"- Beras x{receiptBeras} = ${harga * receiptBeras}\n";
+                totalCost += (receiptBeras * harga);
+            }
+
+            if (receiptObat > 0)
+            {
+                int harga = currentMission.hargaObat;
+                receiptText += $"- Obat x{receiptObat} = ${harga * receiptObat}\n";
+                totalCost += (receiptObat * harga);
+            }
         }
 
         if (receiptBeras == 0 && receiptObat == 0) receiptText += "(Kosong)";
@@ -107,18 +108,23 @@ public class MiniGameManager : MonoBehaviour
         if (txtTotalCost != null) txtTotalCost.text = $"Total: ${totalCost}";
     }
 
-    void OnBuyClicked()
+    public void OnBuyClicked()
     {
         if (receiptBeras == 0 && receiptObat == 0) return;
 
-        int totalCost = (receiptBeras * GameManager.Instance.activeMission.hargaBeras) +
-                        (receiptObat * GameManager.Instance.activeMission.hargaObat);
+        MissionData currentMission = GameManager.Instance.GetCurrentMission();
+        if (currentMission == null) return;
+
+        int totalCost = (receiptBeras * currentMission.hargaBeras) +
+                        (receiptObat * currentMission.hargaObat);
 
         if (GameManager.Instance.currentMoney >= totalCost)
         {
             isPaid = true;
             GameManager.Instance.currentMoney -= totalCost;
-            GameManager.Instance.lastMissionCost = totalCost;
+
+            // Catat biaya belanja (ditambahkan ke Summary)
+            GameManager.Instance.lastMissionCost += totalCost;
 
             GameManager.Instance.AddItem("Beras", receiptBeras);
             GameManager.Instance.AddItem("Obat", receiptObat);
@@ -126,13 +132,11 @@ public class MiniGameManager : MonoBehaviour
             UpdateShopUI();
             if (btnBuy != null) btnBuy.gameObject.SetActive(false);
             if (btnNext != null) btnNext.gameObject.SetActive(true);
-
-            // TAMBAHKAN INI: Bekukan karakter setelah bayar
             if (playerMovement != null) playerMovement.canMove = false;
         }
     }
 
-    void OnNextClicked()
+    public void OnNextClicked()
     {
         if (!isPaid) return;
 
@@ -154,17 +158,7 @@ public class MiniGameManager : MonoBehaviour
         if (canvasGameplay != null) canvasGameplay.SetActive(true);
         if (environment3D != null) environment3D.SetActive(true);
 
-        QuestMarker[] allMarkers = Resources.FindObjectsOfTypeAll<QuestMarker>();
-        foreach (var m in allMarkers)
-        {
-            if (m.missionToComplete == GameManager.Instance.activeMission)
-                m.gameObject.SetActive(true);
-        }
-
         HUDManager hud = FindObjectOfType<HUDManager>();
-        if (hud != null)
-        {
-            hud.UpdateHUD();
-        }
+        if (hud != null) hud.UpdateHUD();
     }
 }

@@ -11,7 +11,9 @@ public class PlayerMovement : MonoBehaviour
     [Header("Gravity")]
     public float gravity;
 
-    // TAMBAHKAN INI: Saklar untuk menghentikan pergerakan
+    [Header("Audio")]
+    public AudioSource stepAudio; // <-- TAMBAHAN: Tarik AudioSource karakter ke sini
+
     [HideInInspector] public bool canMove = true;
 
     private CharacterController controller;
@@ -23,10 +25,8 @@ public class PlayerMovement : MonoBehaviour
         controller = GetComponent<CharacterController>();
         anim = GetComponentInChildren<Animator>();
 
-        if (controller == null)
-            Debug.LogError("Karakter butuh komponen Character Controller!");
-        if (anim == null)
-            Debug.LogWarning("Animator tidak ditemukan di karakter ini atau child-nya!");
+        if (controller == null) Debug.LogError("Karakter butuh komponen Character Controller!");
+        if (anim == null) Debug.LogWarning("Animator tidak ditemukan!");
     }
 
     void Update()
@@ -35,7 +35,6 @@ public class PlayerMovement : MonoBehaviour
         float vertical = 0f;
         bool isRunning = false;
 
-        // HANYA BACA INPUT JIKA canMove TRUE
         if (canMove && Keyboard.current != null)
         {
             if (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed) vertical += 1f;
@@ -49,7 +48,6 @@ public class PlayerMovement : MonoBehaviour
         Vector3 moveDirection = new Vector3(horizontal, 0f, vertical).normalized;
         float currentSpeed = isRunning ? runSpeed : walkSpeed;
 
-        // Gravity tetap berjalan agar karakter tidak melayang
         if (controller.isGrounded && verticalVelocity < 0)
         {
             verticalVelocity = -2f;
@@ -68,11 +66,21 @@ public class PlayerMovement : MonoBehaviour
         if (anim != null)
         {
             float animSpeed = 0f;
-            if (moveDirection != Vector3.zero)
-            {
-                animSpeed = isRunning ? 2f : 1f;
-            }
+            if (moveDirection != Vector3.zero) animSpeed = isRunning ? 2f : 1f;
             anim.SetFloat("Speed", animSpeed);
+        }
+
+        // LOGIKA SFX LANGKAH KAKI
+        if (stepAudio != null)
+        {
+            if (moveDirection != Vector3.zero && controller.isGrounded && canMove)
+            {
+                if (!stepAudio.isPlaying) stepAudio.Play();
+            }
+            else
+            {
+                if (stepAudio.isPlaying) stepAudio.Stop();
+            }
         }
     }
 }

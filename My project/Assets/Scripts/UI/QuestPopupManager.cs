@@ -8,7 +8,8 @@ public class QuestPopupManager : MonoBehaviour
     [Header("UI References")]
     public GameObject popupPanel;
     public Text titleText;
-    public Text costText; // Kita ubah fungsinya jadi "Total Dikirim"
+    public Text costText;
+    public Text txtEstimasi;
     public Button kirimButton;
     public Text logText;
     public CameraController cameraController;
@@ -18,12 +19,16 @@ public class QuestPopupManager : MonoBehaviour
     public Text txtBoxBeras;
     public GameObject boxObat;
     public Text txtBoxObat;
-    public Text txtEstimasi; // Tarik Txt_Estimasi ke sini
+
+    [Header("Audio SFX")]
+    public SFXPlayer sfxSenang; // <-- TAMBAHAN
+    public SFXPlayer sfxSedih;  // <-- TAMBAHAN
 
     [Header("References")]
-    public TruckWaypoint truckWaypoint; // <-- TAMBAHKAN INI (Pindahan dari MiniGameManager)
+    public TruckWaypoint truckWaypoint;
 
     private MissionData currentMission;
+    private QuestMarker activeMarker;
     private int countBeras = 0;
     private int countObat = 0;
 
@@ -42,49 +47,46 @@ public class QuestPopupManager : MonoBehaviour
 
     public void OpenPopup()
     {
-        if (GameManager.Instance.activeMission == null || GameManager.Instance.isMissionCompleted)
+        currentMission = GameManager.Instance.GetCurrentMission();
+
+        if (currentMission == null)
         {
             if (logText != null) logText.text = "Kurir: 'Tidak ada report yang tersedia saat ini.'";
             return;
         }
 
-        currentMission = GameManager.Instance.activeMission;
-
-        // Reset pilihan
         countBeras = 0;
         countObat = 0;
         if (boxBeras != null) boxBeras.SetActive(false);
         if (boxObat != null) boxObat.SetActive(false);
 
-        // Reset ItemCardUI di scene agar angkanya kembali 0
         ItemCardUI[] allCards = Resources.FindObjectsOfTypeAll<ItemCardUI>();
         foreach (var card in allCards) card.ResetAmount();
 
-        // Zoom Kamera
-        QuestMarker targetMarker = null;
+        activeMarker = null;
         QuestMarker[] allMarkers = Resources.FindObjectsOfTypeAll<QuestMarker>();
         foreach (var m in allMarkers)
         {
             if (m.missionToComplete == currentMission && m.gameObject.activeInHierarchy)
             {
-                targetMarker = m;
+                activeMarker = m;
                 break;
             }
         }
-        if (targetMarker != null && cameraController != null)
-            cameraController.ZoomTo(targetMarker.transform.position);
 
-        // UI
-        titleText.text = $"REPORT 1\n{currentMission.missionTitle}\nPilih stok untuk dikirim:";
-        popupPanel.SetActive(true);
-        if (logText != null) logText.text = "Pilih barang lalu klik Kirim.";
+        if (activeMarker != null && cameraController != null)
+            cameraController.ZoomTo(activeMarker.transform.position);
 
-        // Hitung dan tampilkan estimasi waktu
-        if (truckWaypoint != null && txtEstimasi != null)
+        titleText.text = $"REPORT {(GameManager.Instance.currentMissionIndex + 1)}\n{currentMission.missionTitle}\nPilih stok untuk dikirim:";
+
+        if (truckWaypoint != null && txtEstimasi != null && activeMarker != null)
         {
-            float estTime = truckWaypoint.GetEstimatedTime();
+            float estTime = truckWaypoint.GetEstimatedTime(activeMarker.missionWaypoints);
             txtEstimasi.text = $"Estimasi Waktu: {Mathf.CeilToInt(estTime)} Detik";
         }
+
+        popupPanel.SetActive(true);
+        if (logText != null) logText.text = "Pilih barang lalu klik Kirim.";
 
         UpdateUI();
     }
@@ -115,66 +117,46 @@ public class QuestPopupManager : MonoBehaviour
 
     void UpdateUI()
     {
-        // Ganti teks "Biaya" menjadi "Total Barang"
         if (costText != null) costText.text = $"Total Dikirim: {countBeras + countObat}";
-
-        // Tombol kirim aktif jika ada barang yang dipilih
         bool isSomethingSelected = (countBeras > 0 || countObat > 0);
         if (kirimButton != null) kirimButton.interactable = isSomethingSelected;
     }
 
     public void OnKirimClicked()
     {
-        // 1. Kurangi Stok Inventory
         if (countBeras > 0) GameManager.Instance.RemoveItem("Beras", countBeras);
         if (countObat > 0) GameManager.Instance.RemoveItem("Obat", countObat);
 
-        // 2. Validasi Jawaban
         bool isCorrect = false;
         if (currentMission.correctItemName == "Beras")
             isCorrect = (countBeras == currentMission.correctAmount && countObat == 0);
         else if (currentMission.correctItemName == "Obat")
             isCorrect = (countObat == currentMission.correctAmount && countBeras == 0);
 
-        // 3. Simpan Data untuk Summary & Beri Reward/Penalti
-        GameManager.Instance.isMissionCompleted = true;
-        GameManager.Instance.lastMissionTitle = currentMission.missionTitle;
+        GameManager.Instance.ProcessMissionOutcome(isCorrect);
 
+        if (isCorrect && logText != null) logText.text = "Warga: 'Terima kasih banyak! Bantuanmu sangat tepat.'";
+        else if (!isCorrect && logText != null) logText.text = "Warga: 'Ini bukan yang kami butuhkan...' (Trust -10%)";
+
+        // MAIN KAN SFX BERDASARKAN HASIL
         if (isCorrect)
         {
-            // Karena uang sudah dipotong di toko, di sini kita hanya memberi reward profit + trust
-            // (Catatan: kode ini mengasumsikan uang belanja di toko tidak dikembalikan. Jika ingin dikembalikan, sesuaikan logika di GameManager).
-            GameManager.Instance.currentTrust += currentMission.rewardTrust;
-            GameManager.Instance.currentMoney += currentMission.profitUang; // Dapat profit bersih
-
-            GameManager.Instance.lastMissionProfit = currentMission.profitUang;
-            GameManager.Instance.lastMissionTrustGained = currentMission.rewardTrust;
-            if (logText != null) logText.text = "Warga: 'Terima kasih banyak! Bantuanmu sangat tepat.'";
+            if (sfxSenang != null) sfxSenang.PlaySFX();
         }
         else
         {
-            GameManager.Instance.currentTrust -= 10;
-            GameManager.Instance.lastMissionProfit = 0;
-            GameManager.Instance.lastMissionTrustGained = -10;
-            if (logText != null) logText.text = "Warga: 'Ini bukan yang kami butuhkan...' (Trust -10%)";
+            if (sfxSedih != null) sfxSedih.PlaySFX();
         }
 
-        // 4. Tutup Popup & Reset Kamera
         popupPanel.SetActive(false);
         if (cameraController != null) cameraController.ResetZoom();
 
-        // 5. Animasi Tanda Seru
-        QuestMarker[] allMarkers = Resources.FindObjectsOfTypeAll<QuestMarker>();
-        foreach (var m in allMarkers)
+        if (activeMarker != null)
         {
-            if (m.missionToComplete == currentMission)
-            {
-                if (isCorrect) m.PlaySuccessAnimation();
-                else m.gameObject.SetActive(false);
-            }
+            if (isCorrect) activeMarker.PlaySuccessAnimation();
+            else activeMarker.gameObject.SetActive(false);
         }
 
-        // 6. Update HUD
         HUDManager hud = FindObjectOfType<HUDManager>();
         if (hud != null)
         {
@@ -182,14 +164,12 @@ public class QuestPopupManager : MonoBehaviour
             hud.UpdateHUD();
         }
 
-        // 7. Jalankan Truk (Pindahan dari MiniGameManager)
         if (truckWaypoint != null)
         {
-            truckWaypoint.StartDelivery();
-        }
-        else
-        {
-            Debug.LogError("TruckWaypoint belum dimasukkan ke Inspector QuestPopupManager!");
+            if (activeMarker != null && activeMarker.missionWaypoints.Length > 0)
+                truckWaypoint.StartDelivery(activeMarker.missionWaypoints);
+            else
+                truckWaypoint.StartDelivery(null);
         }
     }
 

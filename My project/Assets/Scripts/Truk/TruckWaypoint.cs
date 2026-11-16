@@ -1,6 +1,6 @@
 using UnityEngine;
 using System.Collections;
-using UnityEngine.Events; // <-- TAMBAHKAN INI
+using UnityEngine.Events;
 
 public class TruckWaypoint : MonoBehaviour
 {
@@ -13,65 +13,73 @@ public class TruckWaypoint : MonoBehaviour
     [Range(0.1f, 3f)]
     public float speedMultiplier = 1f;
 
-    [Header("Event Pemicu")] // <-- TAMBAHKAN INI
+    [Header("Audio")]
+    public AudioSource engineAudio; // <-- TAMBAHAN
+
+    [Header("Event Pemicu")]
     public UnityEvent onTruckFinished;
 
-    private int currentWaypointIndex = 0;
     private float currentMoveSpeed;
+    private Transform[] currentRoute;
 
     void Start()
     {
         currentMoveSpeed = baseMoveSpeed * speedMultiplier;
+        if (engineAudio != null) engineAudio.playOnAwake = false;
     }
 
-    public float GetEstimatedTime()
+    public float GetEstimatedTime(Transform[] targetWaypoints)
     {
-        if (waypoints.Length == 0) return 0f;
+        Transform[] routeToCheck = targetWaypoints;
+        if (routeToCheck == null || routeToCheck.Length == 0) routeToCheck = waypoints;
+        if (routeToCheck == null || routeToCheck.Length == 0) return 0f;
 
         float totalDistance = 0f;
-        for (int i = 1; i < waypoints.Length; i++)
-        {
-            totalDistance += Vector3.Distance(waypoints[i - 1].position, waypoints[i].position);
-        }
+        for (int i = 1; i < routeToCheck.Length; i++)
+            totalDistance += Vector3.Distance(routeToCheck[i - 1].position, routeToCheck[i].position);
 
         float currentSpeed = baseMoveSpeed * speedMultiplier;
-        float travelTime = (totalDistance / currentSpeed) + waitAtDestination;
-        return travelTime;
+        return (totalDistance / currentSpeed) + waitAtDestination;
     }
 
-    public void StartDelivery()
+    public void StartDelivery(Transform[] newWaypoints = null)
     {
+        if (newWaypoints != null && newWaypoints.Length > 0) currentRoute = newWaypoints;
+        else currentRoute = waypoints;
+
+        if (currentRoute == null || currentRoute.Length == 0)
+        {
+            Debug.LogError("Rute truk kosong! Tidak ada waypoint.");
+            return;
+        }
+
         gameObject.SetActive(true);
-        transform.position = waypoints[0].position;
+        transform.position = currentRoute[0].position;
         currentMoveSpeed = baseMoveSpeed * speedMultiplier;
+
+        // MAIN KAN SFX MESIN TRUK
+        if (engineAudio != null) engineAudio.Play();
+
         StartCoroutine(MoveTruckRoutine());
     }
 
     IEnumerator MoveTruckRoutine()
     {
-        // 1. JALAN DARI KANTOR KE DESA (Maju)
-        for (int i = 0; i < waypoints.Length; i++)
-        {
-            yield return StartCoroutine(MoveToWaypoint(waypoints[i]));
-        }
+        for (int i = 0; i < currentRoute.Length; i++)
+            yield return StartCoroutine(MoveToWaypoint(currentRoute[i]));
 
-        // 2. SAMPAI DI DESA (Diam sejenak)
         Debug.Log("Truk sampai di desa. Menurunkan barang...");
         yield return new WaitForSeconds(waitAtDestination);
 
-        // 3. JALAN PULANG KE KANTOR (Mundur)
-        Debug.Log("Truk pulang ke kantor...");
-        for (int i = waypoints.Length - 1; i >= 0; i--)
-        {
-            yield return StartCoroutine(MoveToWaypoint(waypoints[i]));
-        }
+        for (int i = currentRoute.Length - 1; i >= 0; i--)
+            yield return StartCoroutine(MoveToWaypoint(currentRoute[i]));
 
-        // 4. SEMBUNYIKAN TRUK & PICUL EVENT
         Debug.Log("Truk sampai di kantor dan menghilang.");
 
-        // Memicu event (Memunculkan tombol End Day)
-        onTruckFinished?.Invoke();
+        // MATIKAN SFX MESIN TRUK
+        if (engineAudio != null) engineAudio.Stop();
 
+        onTruckFinished?.Invoke();
         gameObject.SetActive(false);
     }
 
@@ -85,7 +93,6 @@ public class TruckWaypoint : MonoBehaviour
                 Quaternion lookRotation = Quaternion.LookRotation(direction);
                 transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * 5f);
             }
-
             transform.position = Vector3.MoveTowards(transform.position, targetWaypoint.position, currentMoveSpeed * Time.deltaTime);
             yield return null;
         }
